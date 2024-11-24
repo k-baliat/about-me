@@ -17,7 +17,9 @@ def configure():
 app = dash.Dash(__name__, 
                 # prevent_initial_callbacks=True,
                 external_stylesheets=[dbc.themes.BOOTSTRAP, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"])
-app.title = "Kevin Baliat - Data Scientist Resume"
+app.title = "About Kevin Baliat"
+
+server = app.server
 
 # Color Theme
 colors = {
