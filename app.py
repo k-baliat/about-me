@@ -8,6 +8,8 @@ from dash import *
 import dash_daq as daq
 from flask import Flask, send_from_directory
 from dotenv import load_dotenv
+import datetime
+import pytz
 
 
 def configure():
@@ -478,19 +480,28 @@ app.layout = dbc.Container(
 )
 def update_time_and_weather(_):
     # Get live time
-    now = datetime.datetime.now().strftime("%A, %B %d, %Y %I:%M %p")
+    # Los Angeles Timezone (PST or PDT depending on daylight saving)
+    la_timezone = pytz.timezone("America/Los_Angeles")
+    
+    # Get the current time in UTC, then convert to Los Angeles time
+    now_utc = datetime.datetime.now(pytz.utc)
+    now_la = now_utc.astimezone(la_timezone)
+    
+    # Format the time as required
+    formatted_time = now_la.strftime("%m-%d-%Y %I:%M %p %Z")
+
     # Get weather details
     weather, icon_url = fetch_weather()
 
     # Apply CSS filter to make the icon white
     icon_style = {
         "height": "40px",
-        "marginRight": "10px",
+        "marginRight": "5px",
         "filter": "invert(100%)",  # Apply invert filter to turn icon white
     }
 
     return [
-        html.Div(now, className="text-white text-end fw-bold mb-2"),
+        html.Div(formatted_time, className="text-white text-end fw-bold mb-2"),
         html.Div(
             [
                 html.Img(src=icon_url, style=icon_style) if icon_url else None,
