@@ -488,7 +488,7 @@ def update_time_and_weather(_):
     now_la = now_utc.astimezone(la_timezone)
     
     # Format the time as required
-    formatted_time = now_la.strftime("%m-%d-%Y %I:%M %p %Z")
+    formatted_time = now_la.strftime("%A, %B %d, %I:%M %p %Z")
 
     # Get weather details
     weather, icon_url = fetch_weather()
