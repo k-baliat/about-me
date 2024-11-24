@@ -390,7 +390,7 @@ about_me_content = html.Div(
                             html.A("kevinbaliat@gmail.com", href="mailto:kevinbaliat@gmail.com", className="text-primary"),
                         ],
                         className="mb-2",
-                        style={'margin-left':'10px'}
+                        style={'margin-left':'15px'}
                     ),
                     width=12,
                 ),
@@ -402,11 +402,22 @@ about_me_content = html.Div(
                             html.A("linkedin.com/in/kevin-baliat", href="www.linkedin.com/in/kevin-baliat", target="_blank", className="text-primary"),
                         ],
                         className="mb-2",
-                        style={'margin-left':'10px'}
+                        style={'margin-left':'15px'}
 
                     ),
                     width=12,
                 ),
+                html.Div(
+                [
+                    html.I(className="fab fa-github me-2", style={"color": colors["secondary"]}),
+                    html.Span("GitHub: "),
+                    html.A("github.com/kevinbaliat", href="https://github.com/k-baliat", target="_blank", className="text-primary"),
+                ],
+                className="mb-2",
+                style={'margin-left': '15px'}
+            ),
+            width=12,
+        ),
             ],
         ),
         html.H4(
