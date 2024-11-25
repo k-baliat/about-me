@@ -109,6 +109,7 @@ skills_content = html.Div(
                             html.Li("Machine Learning"),
                             html.Li("Statistical Modeling in R"),
                             html.Li("AWS S3"),
+                            html.Li("R"),
                         ],
                         style={"listStyleType": "none", "padding": 0, "margin": 0},
                     ),
