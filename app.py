@@ -10,6 +10,8 @@ from flask import Flask, send_from_directory
 from dotenv import load_dotenv
 import datetime
 import pytz
+import pandas as pd
+import plotly.express as px
 
 
 def configure():
@@ -25,7 +27,7 @@ server = app.server
 # Color Theme
 colors = {
     "primary": "#191970",  # Dark Blue
-    "secondary": "#F08000",  # Green
+    "secondary": "#F08000",  # Orange
     "background": "#ECF0F1",  # Light Gray
     "text": "#34495E",  # Darker Text
 }
@@ -105,8 +107,8 @@ skills_content = html.Div(
                     html.Ul(
                         [
                             html.Li("Machine Learning"),
-                            html.Li("Statistical Modeling"),
-                            html.Li("Visualization in R"),
+                            html.Li("Statistical Modeling in R"),
+                            html.Li("AWS S3"),
                         ],
                         style={"listStyleType": "none", "padding": 0, "margin": 0},
                     ),
@@ -407,17 +409,18 @@ about_me_content = html.Div(
                     ),
                     width=12,
                 ),
-                html.Div(
-                [
-                    html.I(className="fab fa-github me-2", style={"color": colors["secondary"]}),
-                    html.Span("GitHub: "),
-                    html.A("github.com/kevinbaliat", href="https://github.com/k-baliat", target="_blank", className="text-primary"),
-                ],
-                className="mb-2",
-                style={'margin-left': '15px'}
-            ),
-            width=12,
-        ),
+                dbc.Col(
+                    html.Div(
+                        [
+                            html.I(className="fab fa-github me-2", style={"color": colors["secondary"]}),
+                            html.Span("GitHub: "),
+                            html.A("github.com/kevinbaliat", href="https://github.com/k-baliat", target="_blank", className="text-primary"),
+                        ],
+                        className="mb-2",
+                        style={'margin-left': '15px'}
+                    ),
+                    width=12,
+                ),
             ],
         ),
         html.H4(
@@ -435,6 +438,102 @@ about_me_content = html.Div(
 )
 
 # Main app layout
+_num_projects = 8
+data = pd.DataFrame({
+    "Company": ["Amgen"] * _num_projects,
+    "Organization": ["Operations"] * _num_projects,
+    "Position": ["data_scientist_dmcs"] * _num_projects,
+    "Project": [
+        "Raw Material Supplier Search",
+        "Contamination Control Tracker",
+        "Product Supply Area Inventory Management",
+        "Master Production Schedule App",
+        "Customs Clearance Bot",
+        "Warehouse Dispensing Bot",
+        "Doc Periodic Review Tracker",
+        "Lab Jobs Tracker"
+    ],
+    "Platforms": ["SQL + S3 + Dash", 
+                  "SQL + S3 + Dash", 
+                  "Dash + S3 + UiPath Bot", 
+                  "Dash + S3", 
+                  "SQL + UiPath Bot + Tableau", 
+                  "UiPath Bot + Tableau", 
+                  "SQL + Tableau", 
+                  "SQL + Tableau"],
+    "Annual Hours Saved": [175, 100, 200, 330, 200, 260, 26, 15],
+})
+
+# Metrics Tab Content
+# Metrics Tab Content with Separate Containers
+metrics_content = html.Div(
+    [
+        html.H4(
+            [html.I(className="fas fa-chart-bar me-2"), "Metrics"],
+            style={"color": "#18BC9C", "marginBottom": "20px"},
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    dcc.Dropdown(
+                        id="project-filter",
+                        options=[{"label": project, "value": project} for project in data["Project"]],
+                        placeholder="Filter by project...",
+                        multi=True,
+                        className="mb-3",
+                    ),
+                    width=6,
+                ),
+            ]
+        ),
+        dbc.Row(
+            [
+                # Bar Chart Container
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader("Annual Hours Saved per Project"),
+                            dbc.CardBody(
+                                dcc.Graph(id="bar-chart", style={"height": "400px"})
+                            ),
+                        ],
+                        className="shadow-sm mb-4",
+                        style={"borderRadius": "10px"},
+                    ),
+                    width=6,
+                ),
+                # Donut Chart Container
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader("Proportion of Hours Saved"),
+                            dbc.CardBody(
+                                dcc.Graph(id="pie-chart", style={"height": "400px"})
+                            ),
+                        ],
+                        className="shadow-sm mb-4",
+                        style={"borderRadius": "10px"},
+                    ),
+                    width=6,
+                ),
+            ]
+        ),
+        html.H4(
+            "Detailed Metrics",
+            style={"color": "#18BC9C", "marginTop": "20px", "marginBottom": "10px"},
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    dbc.Table.from_dataframe(data, striped=True, bordered=True, hover=True, id="data-table"),
+                    width=12,
+                ),
+            ]
+        ),
+    ],
+    className="p-4",
+    style={"backgroundColor": "white", "borderRadius": "10px"},
+)
 
 # Add an interval component to trigger updates
 interval_component = dcc.Interval(
@@ -442,6 +541,8 @@ interval_component = dcc.Interval(
     interval=60000,  # Update every minute
     n_intervals=0,
 )
+
+#Visual Metrics Tab
 
 # Add Footer to the app layout
 footer = html.Div(
@@ -470,6 +571,7 @@ app.layout = dbc.Container(
             [
                 dbc.Tab(about_me_content, label="About Me", tab_id="tab-about-me", activeTabClassName="fw-bold text-primary"),
                 dbc.Tab(professional_content, label="Professional", tab_id="tab-professional", activeTabClassName="fw-bold text-primary"),
+                dbc.Tab(metrics_content, label="Metrics", tab_id="tab-metrics", activeTabClassName="fw-bold text-primary"),
 
             ],
             id="tabs",
@@ -524,7 +626,67 @@ def update_time_and_weather(_):
 
 #------------------------------------------------------
 
-# Callback to toggle dark mode
+# Callback to update the Metrics Tab
+@app.callback(
+    [Output("bar-chart", "figure"), Output("pie-chart", "figure"), Output("data-table", "children")],
+    [Input("project-filter", "value")],
+)
+def update_metrics(selected_projects):
+    # Filter data
+    filtered_data = data if not selected_projects else data[data["Project"].isin(selected_projects)]
+
+    # Sort the data by 'Annual Hours Saved' in descending order
+    filtered_data = filtered_data.sort_values(by="Annual Hours Saved", ascending=False)
+
+    # Bar Chart
+    bar_fig = px.bar(
+        filtered_data,
+        x="Project",
+        y="Annual Hours Saved",
+        # title="Annual Hours Saved per Project",
+        labels={"Annual Hours Saved": "Hours Saved", "Project": "Project"},
+        text="Annual Hours Saved",
+    )
+    bar_fig.update_traces(textposition="outside", marker_color="rgb(100, 200, 250)")
+    bar_fig.update_traces(textposition="outside", marker_color="rgb(100, 200, 250)")
+    bar_fig.update_layout(
+        height=550,
+        yaxis={
+            "tick0": 0,  # Start the Y-axis at 0
+            "dtick": 100,  # Increment by 100
+            "range": [0, 500],
+            "title": "Hours Saved",
+        },
+        xaxis={"categoryorder": "total descending"},
+    )
+
+    # Donut Chart
+    total_hours = filtered_data["Annual Hours Saved"].sum()
+    pie_fig = px.pie(
+        filtered_data,
+        names="Project",
+        values="Annual Hours Saved",
+        # title="Proportion of Hours Saved by Project",
+        hole=0.4,  # Makes it a donut chart
+    )
+
+    # Add the total hours saved in the center
+    pie_fig.update_layout(
+        annotations=[
+            {
+                "text": f"Total<br>{total_hours} hrs",
+                "font": {"size": 15, "color": "black"},
+                "showarrow": False,
+                "x": 0.5,
+                "y": 0.5,
+            }
+        ]
+    )
+
+    # Update Table
+    table = dbc.Table.from_dataframe(filtered_data, striped=True, bordered=True, hover=True)
+
+    return bar_fig, pie_fig, table
 
 # Run app
 if __name__ == "__main__":
