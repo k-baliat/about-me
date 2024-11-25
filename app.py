@@ -471,7 +471,7 @@ metrics_content = html.Div(
     [
         html.H4(
             [html.I(className="fas fa-chart-bar me-2"), "Metrics"],
-            style={"color": "#18BC9C", "marginBottom": "20px"},
+            style={"color": colors["secondary"], "marginBottom": "20px"},
         ),
         dbc.Row(
             [
@@ -521,7 +521,7 @@ metrics_content = html.Div(
         ),
         html.H4(
             "Detailed Metrics",
-            style={"color": "#18BC9C", "marginTop": "20px", "marginBottom": "10px"},
+            style={"color": colors["secondary"], "marginTop": "20px", "marginBottom": "10px"},
         ),
         dbc.Row(
             [
