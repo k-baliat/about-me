@@ -676,7 +676,7 @@ def update_metrics(selected_projects):
         annotations=[
             {
                 "text": f"Total<br>{total_hours} hrs",
-                "font": {"size": 15, "color": "black"},
+                "font": {"size": 10, "color": "black"},
                 "showarrow": False,
                 "x": 0.5,
                 "y": 0.5,
